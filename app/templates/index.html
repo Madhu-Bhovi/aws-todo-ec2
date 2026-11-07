@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do list</title>
+<style>
+  :root {
+    --bg: #F3F6F8; --surface: #FFFFFF; --ink: #16232E; --muted: #4F6272;
+    --line: #CBD6DE; --accent: #0B6E7A; --danger: #A63A2B;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F1A22; --surface: #16252F; --ink: #E6EEF3; --muted: #9DB0BE;
+      --line: #2B3E4B; --accent: #5CC4CF; --danger: #F08A7A;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 1.0625rem/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 38rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  h1 { font-size: 2rem; margin: 0 0 1.5rem; }
+  form { margin: 0; }
+  .add { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  input[type="text"] { flex: 1; min-width: 0; padding: 0.7rem 0.8rem; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+  button { font: inherit; padding: 0.7rem 1rem; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+  button.link { border: 0; background: none; padding: 0.4rem 0.5rem; color: var(--accent); }
+  button.link.danger { color: var(--danger); }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  li { display: flex; align-items: center; gap: 0.5rem; padding: 0.7rem 0; border-bottom: 1px solid var(--line); }
+  .title { flex: 1; overflow-wrap: anywhere; }
+  li.done .title { text-decoration: line-through; color: var(--muted); }
+  .empty { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>To-do list</h1>
+
+  <form class="add" method="post" action="{{ url_for('add') }}">
+    <label class="sr" for="title">New task</label>
+    <input id="title" name="title" type="text" maxlength="200" placeholder="What needs doing?" required autofocus>
+    <button class="primary" type="submit">Add task</button>
+  </form>
+
+  {% if tasks %}
+  <ul>
+    {% for task in tasks %}
+    <li class="{{ 'done' if task['done'] else '' }}">
+      <span class="title">{{ task['title'] }}</span>
+      <form method="post" action="{{ url_for('toggle', task_id=task['id']) }}">
+        <button class="link" type="submit">{{ 'Mark not done' if task['done'] else 'Mark done' }}</button>
+      </form>
+      <form method="post" action="{{ url_for('delete', task_id=task['id']) }}">
+        <button class="link danger" type="submit">Delete</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No tasks yet. Add your first one above.</p>
+  {% endif %}
+</main>
+</body>
+</html>
